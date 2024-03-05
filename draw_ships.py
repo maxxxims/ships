@@ -5,6 +5,12 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 from transformation import CoordinateConversion
 
+"""""""""
+    This script get annotations from dataset and convert it to polygons of ships 
+    and also add new points between close ones
+"""""""""
+
+
 
 MASK_COLOR = [255, 0, 0]
 DEFAULT_COLOR = [0, 255, 255]
@@ -18,7 +24,7 @@ def open_json_file(path: Path) -> dict:
 
 def get_image_annotation(data: dict, file_name: str):
     """
-        return annotations for one image
+        return annotations for one image from labels.json
     """
     for image in data['images']:
         if image['file_name'] == file_name:
@@ -35,6 +41,9 @@ def get_image_annotation(data: dict, file_name: str):
 
 
 def get_one_ship_indexes(img: np.ndarray, annotation: dict):
+    """
+        return indexes on image with ship
+    """
     full_len = len(annotation['segmentation'][0])
     segment = (np.reshape(annotation['segmentation'][0], newshape=(full_len//2, 2))).astype(np.int32)
     new_img = cv2.fillPoly(img, [segment], MASK_COLOR)
@@ -43,6 +52,9 @@ def get_one_ship_indexes(img: np.ndarray, annotation: dict):
 
 
 def get_one_ship_indexes_scale(img: np.ndarray, annotation: dict):
+    """
+        return indexes on scaled image with ship
+    """
     full_len = len(annotation['segmentation'][0])
     segment = (np.reshape(annotation['segmentation'][0], newshape=(full_len//2, 2))).astype(np.int32)
     new_img = cv2.fillPoly(img, [segment], MASK_COLOR)
@@ -53,6 +65,9 @@ def get_one_ship_indexes_scale(img: np.ndarray, annotation: dict):
 
 
 def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int = 1, scale_img: bool = False):
+    """
+        make result file with indexes of all ships on image
+    """
     result = []
     transformer = CoordinateConversion(reference_point[0], reference_point[1], reference_point[2], 6400000.0)
     for i, annotation in enumerate(annotations):
@@ -75,6 +90,9 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
 
 
 def add_more_points(x_indexes: list, y_indexes: list, new_points: int = 1) -> tuple:
+    """
+        add extra points between close one's
+    """
     new_x_indexes, new_y_indexes = [], []
     for i in range(len(x_indexes) - 1):
         x, y = x_indexes[i], y_indexes[i]

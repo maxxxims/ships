@@ -2,8 +2,13 @@ import json
 from pathlib import Path
 import numpy as np
 from matplotlib import pyplot as plt
-from collections import defaultdict 
+from collections import defaultdict
 
+
+"""""""""
+Thist script convert temporary results with indexes of ships to special format for generator
+also it use ciir
+"""""""""
 
 def open_json_file(path: Path):
     with open(path, 'r') as file:
@@ -48,7 +53,7 @@ def verify_img():
     img = np.zeros((6 * 800, 3 * 800))
 
     for el in data['original_annotations']:
-        print(el['index'])
+        #print(el['index'])
         img[np.array(el['x_indexes'], dtype=int), np.array(el['y_indexes'], dtype=int)] = 255
         # print(el['x_indexes'])
     plt.imshow(img)
