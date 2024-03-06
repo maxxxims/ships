@@ -1,6 +1,6 @@
 from pathlib import Path
-from draw_ships import open_json_file, get_image_annotation, make_annotation_for_all_ships, save_result, get_one_ship_indexes
-from make_coords import convert_to_coords, save_coords
+from generate_coods.draw_ships import open_json_file, get_image_annotation, make_annotation_for_all_ships, save_result, get_one_ship_indexes
+from generate_coods.make_coords import convert_to_coords, save_coords
 import numpy as np
 from matplotlib import pyplot as plt
 import sys
@@ -31,7 +31,7 @@ def make_config_for_image(file_name: str = 'P0137_92.jpg'):
     # draw_ships(annotations)
     # exit(0)
     img = np.zeros(shape=(800, 800, 3))
-    result = make_annotation_for_all_ships(img, annotations, new_points=40, scale_img=False)
+    result = make_annotation_for_all_ships(img, annotations, new_points=60, scale_img=False)
     save_result(image['file_name'], result, save_result_path=save_temporary_result_path)
 
 
@@ -40,15 +40,21 @@ def make_config_for_image(file_name: str = 'P0137_92.jpg'):
     save_coords(coords, save_path=save_path)
 
 
-def run_cmd(generate=False):
+def run_cmd(folder: Path, generate=False):
     if generate:
+        Executor.set_save_dir(folder)
         Executor.generate_hologram()
         Executor.range_compress()
-        Executor.draw_hologram()
-        Executor.draw_image()
-        Executor.draw_range_compressed()
+        Executor.move_result_file_to_save_folder()
+        Executor.cut_hologram()
+        Executor.cut_image()
+        Executor.show_gologram(cutted=True)
+        Executor.show_image(cutted=True)
+        #Executor.draw_hologram()
+        #Executor.draw_image()
+        #Executor.draw_range_compressed()
     else: 
-        Executor.set_save_dir(Path('ships_1'))
+        Executor.set_save_dir(folder)
         Executor.draw_range_compressed()
         Executor.show_gologram()
         Executor.show_image()
@@ -64,9 +70,10 @@ def get_random_image():
 
 
 if __name__ == "__main__":
-    file_name = 'P0002_4800_5600_6600_7400.jpg'
-    make_config_for_image(file_name=file_name)
-    run_cmd(generate=True)
+    file_name = 'P0002_5260_6060_6000_6800.jpg'
+    #make_config_for_image(file_name=file_name)
+    folder = Path(file_name.replace('.jpg', ''))  #Path('ships_5_moved_60')
+    run_cmd(folder, generate=True)
     #get_random_image()
 
     

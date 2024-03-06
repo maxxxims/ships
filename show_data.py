@@ -4,6 +4,26 @@ from pathlib import Path
 
 
 
+def get_pixel_distribution(img_path: Path):
+    # h, w
+    img = np.abs(np.load(img_path / 'image.npy'))
+    img = (255 * (img - img.min()) / (img.max() - img.min()))#.astype(np.uint8)
+    center_point = (1769, 1237)
+    shapes = (800, -800)
+    new_img: np.ndarray = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
+    new_img = 5 * new_img
+    new_img[new_img > 255] = 255
+    new_img[new_img < 2] = 0
+    
+    print(f'new_shape = {new_img.shape}')
+    plt.imshow(new_img, cmap='gray')
+    plt.show()
+    new_img = new_img[new_img > 0]
+    distr = new_img.flatten()
+    #plt.hist(distr, bins=1000)
+    #plt.show()
+
+
 def show_sar(folder: Path):
     img = np.abs(np.load(folder / 'image.npy'))
     plt.title('SAR', fontsize=18)
@@ -30,4 +50,6 @@ if __name__ == "__main__":
     ship_x_50 = MAIN_PATH / Path('processing/ship_scaled_x50')
     ship_one = MAIN_PATH / Path('processing/ship_one')
     # show_hologram(Path('processing'))
-    show_sar(standart_path)
+    ship_1 = MAIN_PATH / Path('processing/ships_1')
+    #show_sar(ship_1)
+    get_pixel_distribution(ship_1)
