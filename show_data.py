@@ -11,9 +11,9 @@ def get_pixel_distribution(img_path: Path):
     center_point = (1769, 1237)
     shapes = (800, -800)
     new_img: np.ndarray = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
-    new_img = 5 * new_img
-    new_img[new_img > 255] = 255
-    new_img[new_img < 2] = 0
+    new_img = 1 * new_img
+    #new_img[new_img > 255] = 255
+    #new_img[new_img < 2] = 0
     
     print(f'new_shape = {new_img.shape}')
     plt.imshow(new_img, cmap='gray')

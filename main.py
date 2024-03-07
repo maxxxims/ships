@@ -46,18 +46,19 @@ def run_cmd(folder: Path, generate=False):
         Executor.generate_hologram()
         Executor.range_compress()
         Executor.move_result_file_to_save_folder()
+        Executor.cut_comressed_hologram()
         Executor.cut_hologram()
         Executor.cut_image()
         Executor.show_gologram(cutted=True)
         Executor.show_image(cutted=True)
         #Executor.draw_hologram()
         #Executor.draw_image()
-        #Executor.draw_range_compressed()
+        Executor.draw_range_compressed()
     else: 
         Executor.set_save_dir(folder)
         Executor.draw_range_compressed()
-        Executor.show_gologram()
-        Executor.show_image()
+        Executor.show_gologram(cutted=True)
+        Executor.show_image(cutted=True)
 
 
 def get_random_image():
@@ -71,7 +72,7 @@ def get_random_image():
 
 if __name__ == "__main__":
     file_name = 'P0002_5260_6060_6000_6800.jpg'
-    #make_config_for_image(file_name=file_name)
+    make_config_for_image(file_name=file_name)
     folder = Path(file_name.replace('.jpg', ''))  #Path('ships_5_moved_60')
     run_cmd(folder, generate=True)
     #get_random_image()

@@ -25,10 +25,16 @@ class Executor:
 
     @classmethod
     @cdir
-    def generate_hologram(cls, save_folder: Path = None):
+    def generate_output_signal(cls):
         os.chdir(cls.SIMULATION)
-        #os.system(f'./SARSim2')
-        os.chdir(f'../{cls.PROCESSING}')
+        os.system(f'./SARSim2')
+
+    @classmethod
+    @cdir
+    def generate_hologram(cls, save_folder: Path = None):
+        
+        
+        os.chdir(f'{cls.PROCESSING}')
         os.system(
             f'python extract_gologram.py'
         )
@@ -123,7 +129,7 @@ class Executor:
     def draw_range_compressed(cls):
         #os.chdir(cls.PROCESSING / cls.save_path)
         cls._open_save_folder()
-        os.system('ls -l')
+        # os.system('ls -l')
         img = np.abs(np.load('gologram_range_compressed.npy'))
         plt.imshow(img)
         plt.show()
@@ -157,7 +163,7 @@ class Executor:
         img[:, :, 1] = np.imag(hologram)
         img[:, :, 2] = np.abs(hologram)
         img = 1 * (img - img.min()) / (img.max() - img.min())
-
+        img = np.real(hologram)
         if not cutted:
             p1x = hologram.shape[1] // 2
             p1y = hologram.shape[0] // 2 #- 100
@@ -184,8 +190,29 @@ class Executor:
     @cdir
     def cut_hologram(cls):
         cls._open_save_folder()
-        hologram = np.abs(np.load('gologram.npy'))
+        hologram = np.load('gologram.npy')
         print(f'hologram shape = {hologram.shape}')
-        #w, h = hologram.shape[0] // 2, hologram.shape[1] // 2
-        #hologram = hologram[h - 640: h + 640, w - 640 : w + 640]
+        # plt.imshow(np.real(hologram))
+        # plt.show()
+
+        h, w = hologram.shape[0] // 2, hologram.shape[1] // 2
+        hologram = hologram[h - 640: h + 640, w - 640 : w + 640]
+        # plt.imshow(np.real(hologram))
+        # plt.show()
         np.save('gologram.npy', hologram)
+
+
+    @classmethod
+    @cdir
+    def cut_comressed_hologram(cls):
+        cls._open_save_folder()
+        hologram = np.load('gologram_range_compressed.npy')
+        #print(f'hologram shape = {hologram.shape}')
+        plt.imshow(np.real(hologram))
+        plt.show()
+
+        #h, w = hologram.shape[0] // 2, hologram.shape[1] // 2
+        hologram = hologram[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
+        plt.imshow(np.real(hologram))
+        plt.show()
+        np.save('gologram_range_compressed.npy', hologram)
