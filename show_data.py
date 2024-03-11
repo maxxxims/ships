@@ -10,10 +10,11 @@ def get_pixel_distribution(img_path: Path):
     img = (255 * (img - img.min()) / (img.max() - img.min()))#.astype(np.uint8)
     center_point = (1769, 1237)
     shapes = (800, -800)
-    new_img: np.ndarray = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
-    new_img = 1 * new_img
-    #new_img[new_img > 255] = 255
-    #new_img[new_img < 2] = 0
+    new_img = img
+    # new_img: np.ndarray = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
+    new_img = 5 * new_img
+    new_img[new_img > 255] = 255
+    new_img[new_img < 2] = 0
     
     print(f'new_shape = {new_img.shape}')
     plt.imshow(new_img, cmap='gray')
@@ -50,6 +51,6 @@ if __name__ == "__main__":
     ship_x_50 = MAIN_PATH / Path('processing/ship_scaled_x50')
     ship_one = MAIN_PATH / Path('processing/ship_one')
     # show_hologram(Path('processing'))
-    ship_1 = MAIN_PATH / Path('processing/ships_1')
+    ship_1 = MAIN_PATH / Path('processing/P0002_5260_6060_6000_6800')
     #show_sar(ship_1)
     get_pixel_distribution(ship_1)
