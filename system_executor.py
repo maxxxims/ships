@@ -16,6 +16,12 @@ def cdir(func: callable):
     return wrapper
 
 
+def normalize_arr(data: np.ndarray, scale_factor: int = 255, as_uint8: bool = True) -> np.ndarray:
+    data = scale_factor * (data - data.min()) / (data.max() - data.min())
+    if as_uint8:
+        data = data.astype(np.uint8)
+    return data
+
 class Executor:
     main_path = Path('/home/max/projects/dataset_v2')
     SIMULATION = 'simulation'
@@ -137,18 +143,33 @@ class Executor:
 
     @classmethod
     @cdir
-    def show_image(cls, cutted=False):
+    def show_image(cls, cutted=False, show_annotation: bool = True):
         #os.chdir(cls.PROCESSING / cls.save_path)
         cls._open_save_folder()
-        img = np.abs(np.load('image.npy'))
+        """img = np.abs(np.load('image.npy'))
         img = 255 * (img - img.min()) / (img.max() - img.min())
         if not cutted:
             img = cv2.rectangle(img, pt1=(1760 - 400, 1237 - 400), pt2=(1760 + 400, 1237 + 400), color=(255, 0, 0), thickness=2)
-            img = cv2.circle(img, (1760, 1237), 10, color=(128))
+            img = cv2.circle(img, (1760, 1237), 10, color=(128))"""
             
             #img = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
-        plt.imshow(img, cmap='gray')
-        plt.show()
+        img = plt.imread('image.png')
+        if show_annotation:
+            def convert_coord(x: float, y: float):
+                x_new = x - (1760 - 640)
+                y_new = y - (1237 - 640)
+                return (int(x_new), int(y_new))
+                #return (int(x_new), int(y_new))
+            
+
+            annotation = np.loadtxt('annotation.txt', ndmin=2)
+            for a in annotation:
+                #a = a.astype(int)
+                img = cv2.rectangle(img, pt1=convert_coord(a[0], a[1]), pt2=convert_coord(a[2], a[3]), color=(1, 0, 0, 1), thickness=2)
+                print(f'{convert_coord(a[0], a[1])}; {convert_coord(a[2], a[3])}; was = {a[0], a[1]}')
+        plt.imsave('image_cutted.png', img)
+        #plt.imshow(img, cmap='gray')
+        #plt.show()
 
 
     @classmethod
@@ -167,7 +188,6 @@ class Executor:
         if not cutted:
             p1x = hologram.shape[1] // 2
             p1y = hologram.shape[0] // 2 #- 100
-            print(f'px = {p1x}, py = {p1y}')
             img = cv2.rectangle(img, pt1=(p1x - 400, p1y - 400), pt2=(p1x + 400, p1y + 400), color=(1, 1, 1), thickness=2)
             
             img = cv2.rectangle(img, pt1=(p1x - 400, p1y - 400), pt2=(p1x + 400, p1y + 400), color=(1, 1, 1), thickness=2)
@@ -180,18 +200,22 @@ class Executor:
 
     @classmethod
     @cdir
-    def cut_image(cls):
+    def cut_image(cls, save_png: bool = False):
         cls._open_save_folder()
         img = np.abs(np.load('image.npy'))
-        img = img[1237 - 400: 1237 + 400, 1760 - 400 : 1760 + 400]
-        np.save('image.npy', img)
-
+        img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
+        if not save_png:    np.save('image.npy', img)
+        else:   
+            img = normalize_arr(img, as_uint8=True)
+            plt.imsave('image.png', img, cmap='gray')
+            os.remove('image.npy')
+            
     @classmethod
     @cdir
-    def cut_hologram(cls):
+    def cut_hologram(cls, save_png: bool = False):
         cls._open_save_folder()
         hologram = np.load('gologram.npy')
-        print(f'hologram shape = {hologram.shape}')
+        # print(f'hologram shape = {hologram.shape}')
         # plt.imshow(np.real(hologram))
         # plt.show()
 
@@ -199,20 +223,34 @@ class Executor:
         hologram = hologram[h - 640: h + 640, w - 640 : w + 640]
         # plt.imshow(np.real(hologram))
         # plt.show()
-        np.save('gologram.npy', hologram)
+        if not save_png:    np.save('gologram.npy', hologram)
+        else:   
+            hologram_img = np.zeros((hologram.shape[0], hologram.shape[1], 3))
+            hologram_img[:, :, 0] = normalize_arr(np.real(hologram))
+            hologram_img[:, :, 1] = normalize_arr(np.real(hologram))
+            hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 +  np.sqrt(np.imag(hologram)**2)))
+            plt.imsave('gologram.png', hologram_img.astype(np.uint8), cmap='gray')
+            os.remove('gologram.npy')
 
 
     @classmethod
     @cdir
-    def cut_comressed_hologram(cls):
+    def cut_comressed_hologram(cls, save_png: bool = False):
         cls._open_save_folder()
         hologram = np.load('gologram_range_compressed.npy')
         #print(f'hologram shape = {hologram.shape}')
-        plt.imshow(np.real(hologram))
-        plt.show()
+        #plt.imshow(np.real(hologram))
+        #plt.show()
 
         #h, w = hologram.shape[0] // 2, hologram.shape[1] // 2
         hologram = hologram[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
-        plt.imshow(np.real(hologram))
-        plt.show()
-        np.save('gologram_range_compressed.npy', hologram)
+        #plt.imshow(np.real(hologram))
+        #plt.show()
+        if not save_png:    np.save('gologram_range_compressed.npy', hologram)
+        else:   
+            hologram_img = np.zeros((hologram.shape[0], hologram.shape[1], 3))
+            hologram_img[:, :, 0] = normalize_arr(np.real(hologram))
+            hologram_img[:, :, 1] = normalize_arr(np.real(hologram))
+            hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 +  np.sqrt(np.imag(hologram)**2)))
+            plt.imsave('gologram_range_compressed.png', hologram_img.astype(np.uint8), cmap='gray')
+            os.remove('gologram_range_compressed.npy')

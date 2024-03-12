@@ -80,15 +80,34 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
             x_indexes, y_indexes = get_one_ship_indexes_scale(np.copy(img), annotation)
         else:
             x_indexes, y_indexes = get_one_ship_indexes(np.copy(img), annotation)
+            
 
-        x_indexes, y_indexes = add_more_points(x_indexes, y_indexes, new_points=new_points)
-        x_indexes, y_indexes = move_points(x_indexes, y_indexes, x_move=400, y_move=400)
+        x_indexes_new, y_indexes_new = add_more_points(x_indexes, y_indexes, new_points=new_points)
+        # MOVE IMAGE 400 at every axis!!!
+        x_indexes_new, y_indexes_new = move_points(x_indexes_new, y_indexes_new, x_move=400, y_move=400)
         x_indexes_new, y_indexes_new, z_indexes_new = transformer.transform_local_image_to_GPDSK(x_indexes, y_indexes)
+
+        #ADD BBOX
+        x_left, y_left, h, w = annotation['bbox']
+        x_right, y_right = x_left + h, y_left + w
+
+        x_bbox_indexes, y_bbox_indexes = np.array([x_left, x_right]), np.array([y_left, y_right])
+        # x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
+        #x_bbox_indexes, y_bbox_indexes, _ = transformer.transform_local_image_to_GPDSK(x_bbox_indexes, y_bbox_indexes)
+        delta_d = 0.12
+        delta_a = 0.495
+        x_bbox_indexes = [delta_d * el + 1760 for el in x_bbox_indexes]
+        y_bbox_indexes = [1237 - delta_a * el for el in y_bbox_indexes]
+
+
         result.append({
             'index': i,
             'x_indexes': x_indexes_new,
             'y_indexes': y_indexes_new,
             'z_indexes': z_indexes_new,
+            'x_bbox_indexes': x_bbox_indexes,
+            'y_bbox_indexes': y_bbox_indexes,
+
             # 'x_indexes_original':  x_indexes,
             # 'y_indexes_original':  y_indexes,
         })
@@ -128,6 +147,7 @@ def save_result(img_name: str,
     """
         save temporary results with indexes of points
     """
+
     data = {
         'annotation_number': len(result),
         'image_name': img_name,

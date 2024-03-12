@@ -43,7 +43,6 @@ def convert_to_coords(data, limit = None) -> dict:
         coords["nx"] += [0.0] * len(annotation['x_indexes']) 
         coords["ny"] += [0.0] * len(annotation['x_indexes']) 
         coords["nz"] += [1.0] * len(annotation['x_indexes']) 
-
     return coords
 
 
@@ -62,8 +61,8 @@ def verify_img():
 
 def make_test_coords():
     coords = defaultdict(list)
-    coords['x'] += [0.0, 20.0, 40.0]
-    coords['y'] += [0.0, 20.0, 40.0]
+    coords['x'] += [0.0, 200.0, 400.0, 0, 800]
+    coords['y'] += [0.0, 200.0, 400.0, 800, 800]
     coords['z'] += [0.0] * len(coords['x'])
     coords['nx'] += [0.0] * len(coords['x'])
     coords['ny'] += [0.0] * len(coords['x'])
@@ -94,10 +93,10 @@ def test_img_ship_huge_scale():
 if __name__ == '__main__':
     # verify_img()
     # test_img_ship_huge_scale()
-    # coords = make_test_coords()
-    path = Path('draw/result.json')
+    coords = make_test_coords()
+    # path = Path('draw/result.json')
     save_path = Path('/home/max/projects/dataset_v2/simulation/group_0_data.json')
-    data = open_json_file(path)
-    coords = convert_to_coords(data, limit = None)
+    # data = open_json_file(path)
+    # coords = convert_to_coords(data, limit = None)
     
     save_coords(coords, save_path=save_path)

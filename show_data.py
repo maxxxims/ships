@@ -1,3 +1,4 @@
+import os
 from matplotlib import pyplot as plt
 import numpy as np
 from pathlib import Path
@@ -39,8 +40,13 @@ def show_hologram(folder: Path):
     plt.imshow(np.real(holo))
     plt.show()
 
+    # plt.title('Abs hologram', fontsize=18)
+    # plt.imshow(np.abs(holo), cmap='gray')
+    # plt.show()
+
+    holo_compressed = np.load(folder / 'gologram_range_compressed.npy')
     plt.title('Abs hologram', fontsize=18)
-    plt.imshow(np.abs(holo), cmap='gray')
+    plt.imshow(np.abs(holo_compressed), cmap='gray')
     plt.show()
 
 if __name__ == "__main__":
@@ -53,4 +59,10 @@ if __name__ == "__main__":
     # show_hologram(Path('processing'))
     ship_1 = MAIN_PATH / Path('processing/P0002_5260_6060_6000_6800')
     #show_sar(ship_1)
-    get_pixel_distribution(ship_1)
+    ships_data = MAIN_PATH / Path('processing/ships_data')
+    #
+    file_name = os.listdir(ships_data)[0]
+    print(f'file_name = {file_name}')
+    show_sar(ships_data / file_name)    
+    get_pixel_distribution(ships_data / file_name)
+    show_hologram(ships_data / file_name)
