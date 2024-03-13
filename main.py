@@ -1,4 +1,5 @@
 from pathlib import Path
+import shutil
 from generate_coods.draw_ships import open_json_file, get_image_annotation, make_annotation_for_all_ships, save_result, get_one_ship_indexes
 from generate_coods.make_coords import convert_to_coords, save_coords
 from generate_coods.make_annotation import save_annotation
@@ -111,6 +112,42 @@ def make_data(i_start, i_end):
             file.write(f"{str(file_name.replace('.jpg', ''))} {i}" + '\n')
 
 
+def to_one_folder():
+    new_folder = Executor.main_path / 'IMAGES'
+    new_folder.mkdir(exist_ok=True)
+    folder = Executor.main_path / Executor.PROCESSING / 'ships_data'
+    for el in tqdm(folder.iterdir()):
+        if not '.' in el.name:
+            """
+            orig_img = plt.imread(el / 'image.png')
+            annotated_img = plt.imread(el / 'image_cutted.png')
+            save_name = new_folder / f'{el.name}.png'
+            fig = plt.figure(figsize=(18, 15))
+            ax = fig.add_subplot(1, 2, 1)
+            ax.imshow(orig_img)
+            ax = fig.add_subplot(1, 2, 2)
+            ax.imshow(annotated_img)
+            plt.savefig(save_name)
+            """
+            
+            new_directory = new_folder / el.name
+            new_directory.mkdir(exist_ok=True)
+
+            for f_name in ['image.png', 'image_cutted.png', 'gologram.png', 'annotation.txt']:
+                shutil.copy(el / f_name, new_directory / f_name)
+
+            #shutil.copy(el, new_folder / el.name)
+            #print(f'el = {el.name}')
+    ...
+
+def expand_annotations():
+    ...
+
+
+def make_yolo_dataset():
+    ...
+
+
 if __name__ == "__main__":
     file_name = 'P0002_5260_6060_6000_6800.jpg'
     # make_config_for_image(file_name=file_name)
@@ -118,7 +155,8 @@ if __name__ == "__main__":
     #run_cmd(Path('test_data'), generate=False)
     #get_random_image()
     # get_image_name(0)
-    make_data(0, 1000)
+    #make_data(0, 1000)
+    to_one_folder()
 
     # сохранять png
     # разметка
