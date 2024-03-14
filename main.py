@@ -115,6 +115,12 @@ def make_data(i_start, i_end):
 def to_one_folder():
     new_folder = Executor.main_path / 'IMAGES'
     new_folder.mkdir(exist_ok=True)
+    annotation_folder = new_folder / 'labels' / 'val'
+    annotation_folder.mkdir(exist_ok=True, parents=True)
+    images_folder = new_folder / 'images' / 'val'
+    images_folder.mkdir(exist_ok=True, parents=True)
+
+
     folder = Executor.main_path / Executor.PROCESSING / 'ships_data'
     for el in tqdm(folder.iterdir()):
         if not '.' in el.name:
@@ -129,16 +135,45 @@ def to_one_folder():
             ax.imshow(annotated_img)
             plt.savefig(save_name)
             """
-            
-            new_directory = new_folder / el.name
-            new_directory.mkdir(exist_ok=True)
-
-            for f_name in ['image.png', 'image_cutted.png', 'gologram.png', 'annotation.txt']:
-                shutil.copy(el / f_name, new_directory / f_name)
-
-            #shutil.copy(el, new_folder / el.name)
-            #print(f'el = {el.name}')
+            shutil.copy(folder / el / 'image.png', images_folder / f'{el.name}.png')
+            shutil.copy(folder / el / 'annotation_yolo.txt', annotation_folder / f'{el.name}.txt')
     ...
+
+
+def transform_annotation(data_folder: Path):
+    IMG_SIZE = 1280
+    def convert_coord(x: float, y: float):
+        x_new = x - (1760 - 640)
+        y_new = y - (1237 - 640)
+        return (x_new, y_new)
+        #return (int(x_new), int(y_new))
+
+
+    for folder in tqdm(data_folder.iterdir()):
+        if not '.' in folder.name:
+            # img = plt.imread(data_folder / folder / 'image.png')
+            old_annotation = np.loadtxt(data_folder / folder / 'annotation.txt', ndmin=2)
+            new_annotation = np.zeros_like(old_annotation)
+            for i in range(len(old_annotation)):
+                x_left, y_left, x_right, y_right, tag = old_annotation[i]
+                x_left, y_left = convert_coord(x_left, y_left)    
+                x_right, y_right = convert_coord(x_right, y_right)
+                #img = cv2.rectangle(img, pt1=(x_left, y_left), pt2=(x_right, y_right), color=(1, 0, 0), thickness=2)
+                x_center = (x_left + x_right) / 2
+                y_center = (y_left + y_right) / 2
+                h = np.abs(x_right - x_left) / IMG_SIZE
+                w = np.abs(y_right - y_left) / IMG_SIZE
+                x_center = x_center / IMG_SIZE
+                y_center = y_center / IMG_SIZE
+                new_annotation[i] = [int(tag), x_center, y_center, h, w]
+                print(new_annotation[0])
+            #plt.imshow(img)
+            #plt.show()
+            #return  
+            new_annotation.tolist()
+            with open(data_folder / folder / 'annotation_yolo.txt', 'w') as file:
+                for ann in new_annotation:
+                    file.write(f'{int(ann[0])} {ann[1]} {ann[2]} {ann[3]} {ann[4]}\n')
 
 def expand_annotations():
     ...
@@ -156,8 +191,9 @@ if __name__ == "__main__":
     #get_random_image()
     # get_image_name(0)
     #make_data(0, 1000)
-    to_one_folder()
+    transform_annotation(Executor.main_path / 'processing/ships_data')
 
+    to_one_folder()
     # сохранять png
     # разметка
     # сделать интерфейс
