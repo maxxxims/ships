@@ -80,24 +80,29 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
             x_indexes, y_indexes = get_one_ship_indexes_scale(np.copy(img), annotation)
         else:
             x_indexes, y_indexes = get_one_ship_indexes(np.copy(img), annotation)
-            
+        
+        img[x_indexes, y_indexes] = 255
 
-        x_indexes_new, y_indexes_new = add_more_points(x_indexes, y_indexes, new_points=new_points)
+        #x_indexes, y_indexes = add_more_points(x_indexes, y_indexes, new_points=new_points)
         # MOVE IMAGE 400 at every axis!!!
-        x_indexes_new, y_indexes_new = move_points(x_indexes_new, y_indexes_new, x_move=400, y_move=400)
+        x_indexes, y_indexes = move_points(x_indexes, y_indexes, x_move=400, y_move=400)
         x_indexes_new, y_indexes_new, z_indexes_new = transformer.transform_local_image_to_GPDSK(x_indexes, y_indexes)
 
         #ADD BBOX
         x_left, y_left, h, w = annotation['bbox']
         x_right, y_right = x_left + h, y_left + w
 
+        ##img = cv2.rectangle(img, (int(x_left), int(y_left)), (int(x_right), int(y_right)), 255, 1)
+        ##img[int(y_left):int(y_right), int(x_left):int(x_right)] += 100
+        
+
         x_bbox_indexes, y_bbox_indexes = np.array([x_left, x_right]), np.array([y_left, y_right])
-        # x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
-        #x_bbox_indexes, y_bbox_indexes, _ = transformer.transform_local_image_to_GPDSK(x_bbox_indexes, y_bbox_indexes)
-        delta_d = 0.12
-        delta_a = 0.495
-        x_bbox_indexes = [delta_d * el + 1760 for el in x_bbox_indexes]
-        y_bbox_indexes = [1237 - delta_a * el for el in y_bbox_indexes]
+        x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
+        x_bbox_indexes, y_bbox_indexes, z_bbox_indexes = transformer.transform_local_image_to_GPDSK(x_bbox_indexes, y_bbox_indexes)
+        ##delta_d = 0.12
+        ##delta_a = 0.495
+        ##x_bbox_indexes = [delta_d * el + 1760 for el in x_bbox_indexes]
+        ##y_bbox_indexes = [1237 - delta_a * el for el in y_bbox_indexes]
 
 
         result.append({
@@ -107,10 +112,14 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
             'z_indexes': z_indexes_new,
             'x_bbox_indexes': x_bbox_indexes,
             'y_bbox_indexes': y_bbox_indexes,
+            'z_bbox_indexes': z_bbox_indexes
 
             # 'x_indexes_original':  x_indexes,
             # 'y_indexes_original':  y_indexes,
         })
+    ##img[img > 255] = 255
+    ##plt.imshow(img)
+    ##plt.show()
     return result
 
 

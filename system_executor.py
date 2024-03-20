@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 import shutil
@@ -27,7 +28,7 @@ class Executor:
     SIMULATION = 'simulation'
     PROCESSING = 'processing'
     save_path = None
-
+    SUMULATION_PARAMS = 'simulation/simulation_params.json'
 
     @classmethod
     @cdir
@@ -146,6 +147,8 @@ class Executor:
     def show_image(cls, cutted=False, show_annotation: bool = True):
         #os.chdir(cls.PROCESSING / cls.save_path)
         cls._open_save_folder()
+        with open('annotation.json', 'r') as file:
+            annotation = json.load(file)
         """img = np.abs(np.load('image.npy'))
         img = 255 * (img - img.min()) / (img.max() - img.min())
         if not cutted:
@@ -154,7 +157,9 @@ class Executor:
             
             #img = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
         img = plt.imread('image.png')
+        # img = np.load('image.npy')
         if show_annotation:
+            """
             def convert_coord(x: float, y: float):
                 x_new = x - (1760 - 640)
                 y_new = y - (1237 - 640)
@@ -167,9 +172,29 @@ class Executor:
                 #a = a.astype(int)
                 img = cv2.rectangle(img, pt1=convert_coord(a[0], a[1]), pt2=convert_coord(a[2], a[3]), color=(1, 0, 0, 1), thickness=2)
                 print(f'{convert_coord(a[0], a[1])}; {convert_coord(a[2], a[3])}; was = {a[0], a[1]}')
-        plt.imsave('image_cutted.png', img)
-        #plt.imshow(img, cmap='gray')
-        #plt.show()
+            plt.imsave('image_cutted.png', img)
+            """
+            line_radius, col_radius = annotation['cut_image']['line_radius'], annotation['cut_image']['col_radius']
+            center_line, center_col = annotation['cut_image']['center_line'], annotation['cut_image']['center_col']
+
+            for a in annotation['abs_bbox_coord']:
+                # line_left, col_left, line_right, col_right = a
+                line_left = a['line_left'] - (center_line - line_radius)
+                col_left = a['col_left'] - (center_col - col_radius)
+
+                line_right = a['line_right'] - (center_line - line_radius)
+                col_right = a['col_right'] - (center_col - col_radius)
+                
+
+                print(f'{a}; was = {line_left, col_left, line_right, col_right}')
+                img = cv2.rectangle(img, pt1=(col_left, line_left), pt2=(col_right, line_right), color=(1, 0, 0, 1), thickness=1)
+                #img[col_right:col_left, line_right:line_left] = [1, 1, 1, 1]
+                print(f'{col_left}:{col_right}, {line_right}:{line_left}')
+                # img = cv2.circle(img, (col_left, line_left), 4, color=(1, 0, 0, 1))  # correct
+                # img = cv2.circle(img, (col_right, line_right), 4, color=(1, 0, 0, 1)) # correct
+            # img[img > 255] = 255
+            plt.imshow(img, cmap='gray')
+            plt.show()
 
 
     @classmethod
@@ -200,10 +225,21 @@ class Executor:
 
     @classmethod
     @cdir
-    def cut_image(cls, save_png: bool = False):
+    def cut_image(cls, save_png: bool = False, cut: bool = True):
         cls._open_save_folder()
         img = np.abs(np.load('image.npy'))
-        img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
+        if cut:
+            img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
+            with open('annotation.json', 'r') as f:
+                annotation = json.load(f)
+                annotation['cut_image'] = {
+                    'center_line': 1237, 'center_col': 1760,
+                    'line_radius': 640, 'col_radius': 640
+                }
+            with open('annotation.json', 'w') as f:
+                json.dump(annotation, f)
+
+                
         if not save_png:    np.save('image.npy', img)
         else:   
             img = normalize_arr(img, as_uint8=True)
@@ -215,14 +251,14 @@ class Executor:
     def cut_hologram(cls, save_png: bool = False):
         cls._open_save_folder()
         hologram = np.load('gologram.npy')
-        # print(f'hologram shape = {hologram.shape}')
-        # plt.imshow(np.real(hologram))
-        # plt.show()
+        
+        print(f'hologram shape = {hologram.shape}')
+        plt.imshow(np.real(hologram))
+        plt.show()
 
         h, w = hologram.shape[0] // 2, hologram.shape[1] // 2
         hologram = hologram[h - 640: h + 640, w - 640 : w + 640]
-        # plt.imshow(np.real(hologram))
-        # plt.show()
+        
         if not save_png:    np.save('gologram.npy', hologram)
         else:   
             hologram_img = np.zeros((hologram.shape[0], hologram.shape[1], 3))
@@ -231,7 +267,8 @@ class Executor:
             hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 +  np.sqrt(np.imag(hologram)**2)))
             plt.imsave('gologram.png', hologram_img.astype(np.uint8), cmap='gray')
             os.remove('gologram.npy')
-
+        plt.imshow(np.real(hologram))
+        plt.show()
 
     @classmethod
     @cdir
