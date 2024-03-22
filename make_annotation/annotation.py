@@ -69,3 +69,12 @@ class AnnotationTransformer:
         line_right, col_right = self.transform(right_point)
 
         return (line_left, col_left), (line_right, col_right)
+    
+
+    def transform_coords(self, x_indexes, y_indexes, z_indexes):
+        coords = np.array([x_indexes, y_indexes, z_indexes], dtype=np.float64).T 
+        resut_coords = []
+        for el in coords:
+            lineI, colI = self.transform(el)
+            resut_coords.append((lineI, colI))
+        return resut_coords

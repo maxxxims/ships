@@ -149,13 +149,6 @@ class Executor:
         cls._open_save_folder()
         with open('annotation.json', 'r') as file:
             annotation = json.load(file)
-        """img = np.abs(np.load('image.npy'))
-        img = 255 * (img - img.min()) / (img.max() - img.min())
-        if not cutted:
-            img = cv2.rectangle(img, pt1=(1760 - 400, 1237 - 400), pt2=(1760 + 400, 1237 + 400), color=(255, 0, 0), thickness=2)
-            img = cv2.circle(img, (1760, 1237), 10, color=(128))"""
-            
-            #img = img[1237 - 400:1237 + 400, 1760 - 400:1760 + 400]
         img = plt.imread('image.png')
         # img = np.load('image.npy')
         if show_annotation:
@@ -199,6 +192,51 @@ class Executor:
 
     @classmethod
     @cdir
+    def save_annotation(cls, scale_factor: float = 1):
+        cls._open_save_folder()
+        with open('annotation.json', 'r') as file:
+            annotation = json.load(file)
+        
+        line_radius, col_radius = annotation['cut_image']['line_radius'], annotation['cut_image']['col_radius']
+        center_line, center_col = annotation['cut_image']['center_line'], annotation['cut_image']['center_col']
+
+        relative_bbox_coord = []
+
+        for a in annotation['abs_bbox_coord']:
+            line_left = a['line_left'] - (center_line - line_radius)
+            col_left = a['col_left'] - (center_col - col_radius)
+
+            line_right = a['line_right'] - (center_line - line_radius)
+            col_right = a['col_right'] - (center_col - col_radius)
+
+            line_center = (line_left + line_right) / 2
+            col_center = (col_left + col_right)   / 2
+            
+            line_size = scale_factor * np.abs(line_right - line_left)
+            col_size  = scale_factor * np.abs(col_right - col_left)
+
+            relative_bbox_coord.append({
+                'line_center': line_center,
+                'col_center': col_center,
+                'line_size': line_size,
+                'col_size': col_size,
+                'scale_factor': scale_factor
+            })
+        
+        IMG_SIZE = 1280
+        with open('annotation_corrected.txt', 'w') as file:
+            for a in relative_bbox_coord:
+                line_center = a['line_center'] / IMG_SIZE
+                col_center =  a['col_center'] / IMG_SIZE
+                
+                line_size = a['line_size'] / IMG_SIZE
+                col_size  = a['col_size'] / IMG_SIZE
+                string = f'0 {col_center} {line_center} {col_size} {line_size}'
+                file.write(f'{string}\n')
+
+
+    @classmethod
+    @cdir
     def show_gologram(cls, cutted=False):
         #os.chdir(cls.PROCESSING / cls.save_path)
         #os.system('ls -l')
@@ -227,9 +265,9 @@ class Executor:
     @cdir
     def cut_image(cls, save_png: bool = False, cut: bool = True):
         cls._open_save_folder()
-        img = np.abs(np.load('image.npy'))
+        #img = np.abs(np.load('image.npy'))
         if cut:
-            img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
+            #img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
             with open('annotation.json', 'r') as f:
                 annotation = json.load(f)
                 annotation['cut_image'] = {
@@ -240,11 +278,11 @@ class Executor:
                 json.dump(annotation, f)
 
                 
-        if not save_png:    np.save('image.npy', img)
-        else:   
-            img = normalize_arr(img, as_uint8=True)
-            plt.imsave('image.png', img, cmap='gray')
-            os.remove('image.npy')
+        # if not save_png:    np.save('image.npy', img)
+        # else:   
+        #     img = normalize_arr(img, as_uint8=True)
+        #     plt.imsave('image.png', img, cmap='gray')
+        #     os.remove('image.npy')
             
     @classmethod
     @cdir

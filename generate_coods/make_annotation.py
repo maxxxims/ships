@@ -51,5 +51,5 @@ def save_annotation_v2(result: list, save_folder: Path, transformer: AnnotationT
             data['abs_bbox_coord'].append({
                 'line_left': line_left, 'col_left': col_left, 'line_right': line_right, 'col_right': col_right
             })
-
+        
         json.dump(data, f, indent=2)

@@ -85,7 +85,7 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
 
         #x_indexes, y_indexes = add_more_points(x_indexes, y_indexes, new_points=new_points)
         # MOVE IMAGE 400 at every axis!!!
-        x_indexes, y_indexes = move_points(x_indexes, y_indexes, x_move=400, y_move=400)
+        #x_indexes, y_indexes = move_points(x_indexes, y_indexes, x_move=400, y_move=400)
         x_indexes_new, y_indexes_new, z_indexes_new = transformer.transform_local_image_to_GPDSK(x_indexes, y_indexes)
 
         #ADD BBOX
@@ -97,7 +97,7 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
         
 
         x_bbox_indexes, y_bbox_indexes = np.array([x_left, x_right]), np.array([y_left, y_right])
-        x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
+        #x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
         x_bbox_indexes, y_bbox_indexes, z_bbox_indexes = transformer.transform_local_image_to_GPDSK(x_bbox_indexes, y_bbox_indexes)
         ##delta_d = 0.12
         ##delta_a = 0.495
