@@ -265,9 +265,9 @@ class Executor:
     @cdir
     def cut_image(cls, save_png: bool = False, cut: bool = True):
         cls._open_save_folder()
-        #img = np.abs(np.load('image.npy'))
+        img = np.abs(np.load('image.npy'))
         if cut:
-            #img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
+            img = img[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
             with open('annotation.json', 'r') as f:
                 annotation = json.load(f)
                 annotation['cut_image'] = {
@@ -278,11 +278,11 @@ class Executor:
                 json.dump(annotation, f)
 
                 
-        # if not save_png:    np.save('image.npy', img)
-        # else:   
-        #     img = normalize_arr(img, as_uint8=True)
-        #     plt.imsave('image.png', img, cmap='gray')
-        #     os.remove('image.npy')
+        if not save_png:    np.save('image.npy', img)
+        else:   
+            img = normalize_arr(img, as_uint8=True)
+            plt.imsave('image.png', img, cmap='gray')
+            os.remove('image.npy')
             
     @classmethod
     @cdir
@@ -290,9 +290,9 @@ class Executor:
         cls._open_save_folder()
         hologram = np.load('gologram.npy')
         
-        print(f'hologram shape = {hologram.shape}')
-        plt.imshow(np.real(hologram))
-        plt.show()
+        #print(f'hologram shape = {hologram.shape}')
+        # plt.imshow(np.real(hologram))
+        # plt.show()
 
         h, w = hologram.shape[0] // 2, hologram.shape[1] // 2
         hologram = hologram[h - 640: h + 640, w - 640 : w + 640]
@@ -302,30 +302,23 @@ class Executor:
             hologram_img = np.zeros((hologram.shape[0], hologram.shape[1], 3))
             hologram_img[:, :, 0] = normalize_arr(np.real(hologram))
             hologram_img[:, :, 1] = normalize_arr(np.real(hologram))
-            hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 +  np.sqrt(np.imag(hologram)**2)))
+            hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 +  np.imag(hologram)**2))
             plt.imsave('gologram.png', hologram_img.astype(np.uint8), cmap='gray')
             os.remove('gologram.npy')
-        plt.imshow(np.real(hologram))
-        plt.show()
+        #plt.imshow(np.real(hologram))
+        #plt.show()
 
     @classmethod
     @cdir
     def cut_comressed_hologram(cls, save_png: bool = False):
         cls._open_save_folder()
         hologram = np.load('gologram_range_compressed.npy')
-        #print(f'hologram shape = {hologram.shape}')
-        #plt.imshow(np.real(hologram))
-        #plt.show()
-
-        #h, w = hologram.shape[0] // 2, hologram.shape[1] // 2
         hologram = hologram[1237 - 640: 1237 + 640, 1760 - 640 : 1760 + 640]
-        #plt.imshow(np.real(hologram))
-        #plt.show()
         if not save_png:    np.save('gologram_range_compressed.npy', hologram)
         else:   
             hologram_img = np.zeros((hologram.shape[0], hologram.shape[1], 3))
             hologram_img[:, :, 0] = normalize_arr(np.real(hologram))
             hologram_img[:, :, 1] = normalize_arr(np.real(hologram))
-            hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 +  np.sqrt(np.imag(hologram)**2)))
+            hologram_img[:, :, 2] = normalize_arr(np.sqrt(np.real(hologram)**2 + np.imag(hologram)**2))
             plt.imsave('gologram_range_compressed.png', hologram_img.astype(np.uint8), cmap='gray')
             os.remove('gologram_range_compressed.npy')

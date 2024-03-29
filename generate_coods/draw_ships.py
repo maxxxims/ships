@@ -79,13 +79,13 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
         if scale_img:
             x_indexes, y_indexes = get_one_ship_indexes_scale(np.copy(img), annotation)
         else:
-            x_indexes, y_indexes = get_one_ship_indexes(np.copy(img), annotation)
+            y_indexes, x_indexes  = get_one_ship_indexes(np.copy(img), annotation)
         
-        img[x_indexes, y_indexes] = 255
+        #img[x_indexes, y_indexes] = 255
 
-        #x_indexes, y_indexes = add_more_points(x_indexes, y_indexes, new_points=new_points)
+        x_indexes, y_indexes = add_more_points(x_indexes, y_indexes, new_points=new_points)
         # MOVE IMAGE 400 at every axis!!!
-        #x_indexes, y_indexes = move_points(x_indexes, y_indexes, x_move=400, y_move=400)
+        x_indexes, y_indexes = move_points(x_indexes, y_indexes, x_move=400, y_move=400)
         x_indexes_new, y_indexes_new, z_indexes_new = transformer.transform_local_image_to_GPDSK(x_indexes, y_indexes)
 
         #ADD BBOX
@@ -95,9 +95,9 @@ def make_annotation_for_all_ships(img: np.ndarray, annotations, new_points: int 
         ##img = cv2.rectangle(img, (int(x_left), int(y_left)), (int(x_right), int(y_right)), 255, 1)
         ##img[int(y_left):int(y_right), int(x_left):int(x_right)] += 100
         
-
+        
         x_bbox_indexes, y_bbox_indexes = np.array([x_left, x_right]), np.array([y_left, y_right])
-        #x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
+        x_bbox_indexes, y_bbox_indexes = move_points(x_bbox_indexes, y_bbox_indexes, x_move=400, y_move=400)
         x_bbox_indexes, y_bbox_indexes, z_bbox_indexes = transformer.transform_local_image_to_GPDSK(x_bbox_indexes, y_bbox_indexes)
         ##delta_d = 0.12
         ##delta_a = 0.495
@@ -127,6 +127,7 @@ def add_more_points(x_indexes: list, y_indexes: list, new_points: int = 1) -> tu
     """
         add extra points between close one's
     """
+    #print(f'NEW POINTS = {new_points}')
     new_x_indexes, new_y_indexes = [], []
     for i in range(len(x_indexes) - 1):
         x, y = x_indexes[i], y_indexes[i]
