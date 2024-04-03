@@ -85,11 +85,11 @@ def get_ds_info(path_to_ds: Path):
     
 
 if __name__ == "__main__":
-    path_to_ds = Path('/home/max/projects/fiftyone/ds_sar_test')
+    path_to_ds = Path('/home/max/projects/fiftyone/ds_compressed_test')
     image_names_path = Path('scripts/image_names.json')
     image_names = json.load(open(image_names_path, 'r'))[0]['images']
     # print(image_names)
-    # merge_one_folder(path_to_ds)
-    # make_new_ds_split(path_to_ds, image_names)
+    merge_one_folder(path_to_ds)
+    make_new_ds_split(path_to_ds, image_names)
     get_ds_info(path_to_ds)
     ...
