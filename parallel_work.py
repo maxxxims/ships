@@ -83,7 +83,7 @@ def split_dataset():
     labels = os.listdir(annotation_folder)
 
     train_labels, val_labels = train_test_split(labels, test_size=0.2, random_state=42)
-
+    
     annotation_train = path_fo_ds / 'labels' / 'train'
     images_train = path_fo_ds / 'images' / 'train'
     annotation_train.mkdir(exist_ok=True, parents=True)
@@ -108,10 +108,29 @@ def split_dataset():
 
 
 
+def count_ships():
+    path_fo_ds = Path('/home/max/projects/fiftyone/ds_sar')
+    anotation_folder = path_fo_ds / 'labels'
+    splits = ['train', 'val']
+    counts = []
+    for split in tqdm(splits):
+        folder = anotation_folder / split
+        for f_name in folder.iterdir():
+            annotation = np.loadtxt(f_name, ndmin=2)
+            counts.append(len(annotation))
+    print(np.sum(np.array(counts) > 10))
+    np.save('scripts/counts.npy', np.array(counts))
+    plt.hist(counts, bins=200)
+    plt.ylim(0, 100)
+    plt.show()
+
 
 
 
 if __name__ == '__main__':
-    #copy_ds()
-    #move_annotations()
-    split_dataset()
+    # copy_ds()
+    # move_annotations()
+    # split_dataset()
+    #5176/5602
+
+    count_ships()
