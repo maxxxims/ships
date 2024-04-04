@@ -53,14 +53,14 @@ def make_new_ds_split(path_to_ds, good_samples: list, random_state: int = 42, te
     for sample_name in train_labels:
         lable_name = sample_name + '.txt'
         image_name = sample_name + '.png'
-        shutil.move(tmp_labels_path / lable_name, path_to_ds / 'labels' / 'train' / image_name)
+        shutil.move(tmp_labels_path / lable_name, path_to_ds / 'labels' / 'train' / lable_name)
         shutil.move(tmp_images_path / image_name, path_to_ds / 'images' / 'train' / image_name)
     
 
     for sample_name in val_labels:
         lable_name = sample_name + '.txt'
         image_name = sample_name + '.png'
-        shutil.move(tmp_labels_path / lable_name, path_to_ds / 'labels' / 'val' / image_name)
+        shutil.move(tmp_labels_path / lable_name, path_to_ds / 'labels' / 'val' / lable_name)
         shutil.move(tmp_images_path / image_name, path_to_ds / 'images' / 'val' / image_name)
 
 def get_ds_info(path_to_ds: Path):
@@ -85,7 +85,7 @@ def get_ds_info(path_to_ds: Path):
     
 
 if __name__ == "__main__":
-    path_to_ds = Path('/home/max/projects/fiftyone/ds_compressed_test')
+    path_to_ds = Path('/home/max/projects/fiftyone/large2/ds_compressed')
     image_names_path = Path('scripts/image_names.json')
     image_names = json.load(open(image_names_path, 'r'))[0]['images']
     # print(image_names)
